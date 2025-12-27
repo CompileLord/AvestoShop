@@ -1,0 +1,363 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="dashboard-container" style="max-width: 1200px; margin: 40px auto; padding: 0 20px;">
+    <!-- Header -->
+    <div class="dashboard-header" style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px;">
+        <div>
+            <h1 style="font-size: 32px; font-weight: 800; color: #1a1a1a; margin-bottom: 8px;">Dashboard</h1>
+            <p style="color: #666; font-size: 16px;">Welcome back to <strong>{{ shop.title }}</strong></p>
+        </div>
+        <div class="header-actions">
+            <a href="{% url 'post_create' %}" class="btn-primary-modern">
+                <i class="fas fa-plus"></i> Add New Product
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; margin-bottom: 40px;">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: #eef2ff; color: #4f46e5;"><i class="fas fa-shopping-bag"></i></div>
+            <div class="stat-info">
+                <span class="stat-label">Total Sales</span>
+                <h2 class="stat-value">{{ count_sales.id__count|default:0 }}</h2>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background: #fff7ed; color: #ea580c;"><i class="fas fa-heart"></i></div>
+            <div class="stat-info">
+                <span class="stat-label">Total Likes</span>
+                <h2 class="stat-value">{{ count_likes.id__count|default:0 }}</h2>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background: #f0fdf4; color: #16a34a;"><i class="fas fa-box"></i></div>
+            <div class="stat-info">
+                <span class="stat-label">Active Products</span>
+                <h2 class="stat-value">{{ last_posts.count }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-main-grid" style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px;">
+        <!-- Left Column -->
+        <div class="dashboard-left">
+            <!-- Recent Products -->
+            <div class="content-card" style="margin-bottom: 30px;">
+                <div class="card-header">
+                    <h3>Recent Products</h3>
+                    <a href="#" class="view-all">View All</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Price</th>
+                                <th>Stock</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for post in last_posts %}
+                            <tr>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <div style="width: 40px; height: 40px; border-radius: 6px; overflow: hidden; background: #f5f5f5;">
+                                            {% if post.image %}
+                                                <img src="{{ post.image.url }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                            {% else %}
+                                                <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #ccc;"><i class="fas fa-image"></i></div>
+                                            {% endif %}
+                                        </div>
+                                        <a href="{% url 'post_detail' post.pk %}" class="product-link">{{ post.title }}</a>
+                                    </div>
+                                </td>
+                                <td>${{ post.price }}</td>
+                                <td>
+                                    <span class="stock-badge {% if post.quantity < 5 %}low-stock{% endif %}">
+                                        {{ post.quantity }} in stock
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="action-btns">
+                                        <a href="{% url 'post_update' post.pk %}" class="action-btn edit"><i class="fas fa-edit"></i></a>
+                                        <a href="{% url 'post_delete' post.pk %}" class="action-btn delete"><i class="fas fa-trash"></i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="4" style="text-align: center; padding: 40px; color: #999;">No products yet.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Recent Sales -->
+            <div class="content-card">
+                <div class="card-header">
+                    <h3>Recent Sales</h3>
+                </div>
+                <div class="table-responsive">
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th>Customer</th>
+                                <th>Product</th>
+                                <th>Date</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for sale in last_sales %}
+                            <tr>
+                                <td><strong>{{ sale.customer.username }}</strong></td>
+                                <td>{{ sale.post.title|truncatechars:25 }}</td>
+                                <td style="color: #666; font-size: 13px;">{{ sale.datetime|date:"M d, Y" }}</td>
+                                <td style="font-weight: 600; color: #16a34a;">${{ sale.total_price }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="4" style="text-align: center; padding: 40px; color: #999;">No sales yet.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="dashboard-right">
+            <!-- Recent Comments -->
+            <div class="content-card">
+                <div class="card-header">
+                    <h3>Customer Feedback</h3>
+                </div>
+                <div class="comments-feed">
+                    {% for comment in list_comments %}
+                    <div class="feed-item">
+                        <div class="feed-user">
+                            <strong>{{ comment.from_user.username }}</strong>
+                            <span class="feed-date">{{ comment.created_at|timesince }} ago</span>
+                        </div>
+                        <p class="feed-text">"{{ comment.text_comment|truncatechars:80 }}"</p>
+                        <div class="feed-meta">
+                            on <a href="{% url 'post_detail' comment.post.pk %}">{{ comment.post.title|truncatechars:20 }}</a>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p style="text-align: center; padding: 20px; color: #999;">No feedback yet.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --primary-modern: #4f46e5;
+        --bg-card: #ffffff;
+        --text-main: #1a1a1a;
+        --text-muted: #666666;
+        --border-light: #f0f0f0;
+    }
+
+    .btn-primary-modern {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--primary-modern);
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.2s;
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+    }
+
+    .btn-primary-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(79, 70, 229, 0.3);
+    }
+
+    .stat-card {
+        background: var(--bg-card);
+        padding: 24px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        border: 1px solid var(--border-light);
+    }
+
+    .stat-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+    }
+
+    .stat-label {
+        display: block;
+        color: var(--text-muted);
+        font-size: 14px;
+        font-weight: 500;
+        margin-bottom: 4px;
+    }
+
+    .stat-value {
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--text-main);
+        margin: 0;
+    }
+
+    .content-card {
+        background: var(--bg-card);
+        border-radius: 16px;
+        border: 1px solid var(--border-light);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+    }
+
+    .card-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid var(--border-light);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-header h3 {
+        font-size: 18px;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .view-all {
+        font-size: 14px;
+        color: var(--primary-modern);
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .modern-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .modern-table th {
+        text-align: left;
+        padding: 16px 24px;
+        background: #fcfcfc;
+        color: var(--text-muted);
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .modern-table td {
+        padding: 16px 24px;
+        border-bottom: 1px solid var(--border-light);
+    }
+
+    .product-link {
+        color: var(--text-main);
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.2s;
+    }
+
+    .product-link:hover {
+        color: var(--primary-modern);
+    }
+
+    .stock-badge {
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        background: #f0fdf4;
+        color: #16a34a;
+    }
+
+    .stock-badge.low-stock {
+        background: #fef2f2;
+        color: #dc2626;
+    }
+
+    .action-btns {
+        display: flex;
+        gap: 8px;
+    }
+
+    .action-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .action-btn.edit { background: #f5f5f5; color: #666; }
+    .action-btn.delete { background: #fef2f2; color: #dc2626; }
+    .action-btn:hover { transform: scale(1.1); }
+
+    .comments-feed {
+        padding: 24px;
+    }
+
+    .feed-item {
+        padding-bottom: 20px;
+        margin-bottom: 20px;
+        border-bottom: 1px solid var(--border-light);
+    }
+
+    .feed-item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .feed-user {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+    }
+
+    .feed-date {
+        font-size: 12px;
+        color: #999;
+    }
+
+    .feed-text {
+        font-size: 14px;
+        color: #444;
+        margin: 0 0 8px 0;
+        line-height: 1.5;
+        font-style: italic;
+    }
+
+    .feed-meta {
+        font-size: 12px;
+        color: #999;
+    }
+
+    .feed-meta a {
+        color: var(--primary-modern);
+        text-decoration: none;
+    }
+</style>
+{% endblock content %}

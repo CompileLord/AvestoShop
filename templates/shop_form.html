@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="form-container" style="max-width: 600px; margin: 40px auto; padding: 30px; background: #fff; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+    <h2 style="text-align: center; margin-bottom: 30px; color: var(--primary-color);">
+        {% if form.instance.pk %}Edit Shop{% else %}Create Your Shop{% endif %}
+    </h2>
+    
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% for field in form %}
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label for="{{ field.id_for_label }}" style="display: block; margin-bottom: 8px; font-weight: 500;">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}
+                    <small style="color: #666;">{{ field.help_text }}</small>
+                {% endif %}
+                {% for error in field.errors %}
+                    <div style="color: red; font-size: 12px; margin-top: 5px;">{{ error }}</div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+        
+        <button type="submit" style="width: 100%; padding: 12px; background-color: var(--primary-color); color: white; border: none; border-radius: 5px; font-size: 16px; font-weight: 600; cursor: pointer; transition: background 0.3s;">
+            {% if form.instance.pk %}Update Shop{% else %}Create Shop{% endif %}
+        </button>
+    </form>
+</div>
+
+<style>
+    /* Basic form styling override if needed */
+    input[type="text"], input[type="email"], input[type="password"], textarea, select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-family: inherit;
+    }
+    input:focus, textarea:focus, select:focus {
+        border-color: var(--primary-color);
+        outline: none;
+    }
+</style>
+{% endblock content %}

@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="form-container" style="max-width: 500px; margin: 60px auto; padding: 40px; background: #fff; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+    <h2 style="text-align: center; margin-bottom: 30px; color: var(--primary-color);">Sign Up</h2>
+    
+    <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label for="{{ field.id_for_label }}" style="display: block; margin-bottom: 8px; font-weight: 500;">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}
+                    <small style="color: #666; display: block; margin-top: 5px;">{{ field.help_text }}</small>
+                {% endif %}
+                {% for error in field.errors %}
+                    <div style="color: red; font-size: 12px; margin-top: 5px;">{{ error }}</div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+        
+        <button type="submit" style="width: 100%; padding: 12px; background-color: var(--primary-color); color: white; border: none; border-radius: 5px; font-size: 16px; font-weight: 600; cursor: pointer; transition: background 0.3s;">
+            Create Account
+        </button>
+    </form>
+    
+    <p style="text-align: center; margin-top: 20px; font-size: 14px;">
+        Already have an account? <a href="{% url 'login' %}" style="color: var(--primary-color); font-weight: 600;">Sign In</a>
+    </p>
+</div>
+
+<style>
+    input[type="text"], input[type="email"], input[type="password"] {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-family: inherit;
+    }
+    input:focus {
+        border-color: var(--primary-color);
+        outline: none;
+    }
+</style>
+{% endblock content %}

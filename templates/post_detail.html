@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="product-detail-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 40px;">
+    <!-- Product Images -->
+    <div class="product-gallery">
+        <div class="main-image" id="mainImageContainer" style="border: 1px solid var(--border-color); border-radius: 10px; overflow: hidden; height: 400px; display: flex; align-items: center; justify-content: center; background: #f9f9f9; margin-bottom: 15px;">
+            {% if post.image %}
+                <img id="mainImage" src="{{ post.image.url }}" alt="{{ post.title }}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+            {% elif post.images.first %}
+                <img id="mainImage" src="{{ post.images.first.image.url }}" alt="{{ post.title }}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+            {% else %}
+                <span>No Image Available</span>
+            {% endif %}
+        </div>
+        
+        <div class="thumbnails" style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px;">
+            {% if post.image %}
+                <div class="thumbnail" onclick="document.getElementById('mainImage').src='{{ post.image.url }}'" style="width: 80px; height: 80px; border: 1px solid #ddd; border-radius: 5px; cursor: pointer; overflow: hidden; flex-shrink: 0;">
+                    <img src="{{ post.image.url }}" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+            {% endif %}
+            {% for img in post.images.all %}
+                <div class="thumbnail" onclick="document.getElementById('mainImage').src='{{ img.image.url }}'" style="width: 80px; height: 80px; border: 1px solid #ddd; border-radius: 5px; cursor: pointer; overflow: hidden; flex-shrink: 0;">
+                    <img src="{{ img.image.url }}" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Product Info -->
+    <div class="product-details-info">
+        <h1 style="font-size: 32px; margin-bottom: 10px;">{{ post.title }}</h1>
+        <p style="color: var(--text-light); margin-bottom: 20px;">Category: {{ post.category.title }} | Shop: <a href="{% url 'shop_detail' post.shop.pk %}" style="color: var(--primary-color);">{{ post.shop.title }}</a></p>
+        
+        <div class="price-box" style="font-size: 28px; font-weight: 700; color: var(--primary-color); margin-bottom: 20px;">
+            ${{ post.price|default:"0.00" }}
+            {% if post.discount %}
+                <span style="font-size: 16px; color: #ff4444; text-decoration: line-through; margin-left: 10px;">{{ post.discount }}% OFF</span>
+            {% endif %}
+        </div>
+
+        <p style="margin-bottom: 30px; line-height: 1.6;">{{ post.description }}</p>
+
+        <div class="actions" style="margin-bottom: 30px; display: flex; gap: 15px; align-items: center;">
+            {% if user.is_authenticated %}
+            <a href="{% url 'add_to_cart' post.id %}">
+                <button style="padding: 15px 30px; background-color: var(--primary-color); color: white; border: none; border-radius: 5px; font-size: 16px; font-weight: 600; cursor: pointer;">
+                    <i class="fas fa-cart-plus"></i> Add to Cart
+                </button> 
+            </a>
+            
+            <form action="{% url 'like_create' post.id %}" method="post" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" style="padding: 15px 25px; background-color: #fff; color: #ff4444; border: 1px solid #ff4444; border-radius: 5px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+                    <i class="fas fa-heart"></i> Like ({{ post.like_set.count }})
+                </button>
+            </form>
+            {% else %}
+                <a href="{% url 'login' %}" style="display: inline-block; padding: 15px 30px; background-color: #f0f0f0; color: var(--text-color); border: 1px solid #ddd; border-radius: 5px; text-decoration: none; font-weight: 600;">
+                    Login to Buy
+                </a>
+            {% endif %}
+        </div>
+        
+        <div class="meta-info" style="font-size: 14px; color: var(--text-light);">
+            <p>Condition: {{ post.get_state_product_display }}</p>
+            <p>Quantity Available: {{ post.quantity }}</p>
+        </div>
+    </div>
+</div>
+
+<!-- Comments Section -->
+<section class="comments-section" style="margin-top: 60px;">
+    <h3 style="border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 20px;">Comments ({{ comments.count }})</h3>
+    
+    <div class="comments-list">
+        {% for comment in comments %}
+        <div class="comment" style="background: #f9f9f9; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
+            <div style="font-weight: 600; margin-bottom: 5px;">{{ comment.from_user.username }} <span style="font-weight: 400; font-size: 12px; color: #999;">{{ comment.created_at|date:"M d, Y" }}</span></div>
+            <p>{{ comment.text_comment }}</p>
+        </div>
+        {% empty %}
+        <p>No comments yet.</p>
+        {% endfor %}
+    </div>
+
+    {% if user.is_authenticated %}
+    <div class="add-comment" style="margin-top: 30px;">
+        <h4>Add a Comment</h4>
+        <form action="{% url 'comment_create' post.pk %}" method="post">
+            {% csrf_token %}
+            <textarea name="text_comment" rows="4" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 5px; margin-bottom: 10px;" placeholder="Write your comment here..."></textarea>
+            <button type="submit" style="padding: 10px 20px; background-color: var(--secondary-color); border: 1px solid var(--border-color); border-radius: 5px; cursor: pointer;">Post Comment</button>
+        </form>
+    </div>
+    {% endif %}
+</section>
+
+<!-- Related Products -->
+<section class="related-products" style="margin-top: 60px;">
+    <h3 style="border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 20px;">You might also like</h3>
+    <div class="product-grid">
+        {% for related in recomendation %}
+        <div class="product-card">
+            <div class="product-image" style="height: 150px;">
+                {% if related.images.first %}
+                    <img src="{{ related.images.first.image.url }}" alt="{{ related.title }}">
+                {% elif related.image %}
+                     <img src="{{ related.image.url }}" alt="{{ related.title }}">
+                {% else %}
+                    <div style="width:100%; height:100%; background:#eee;"></div>
+                {% endif %}
+            </div>
+            <div class="product-info">
+                <h4 class="product-title" style="font-size: 14px;">{{ related.title }}</h4>
+                <div class="product-price" style="font-size: 16px;">${{ related.price|default:"0.00" }}</div>
+                <a href="{% url 'post_detail' related.pk %}" style="font-size: 12px; color: var(--primary-color);">View</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock content %}

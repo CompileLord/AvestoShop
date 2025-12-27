@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="confirmation-container" style="max-width: 500px; margin: 80px auto; padding: 40px; background: #fff; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center;">
+    <h2 style="color: #ff4444; margin-bottom: 20px;">Confirm Deletion</h2>
+    <p style="margin-bottom: 30px; font-size: 16px;">Are you sure you want to delete "<strong>{{ object }}</strong>"? This action cannot be undone.</p>
+    
+    <form method="post">
+        {% csrf_token %}
+        <div class="actions" style="display: flex; justify-content: center; gap: 20px;">
+            <a href="javascript:history.back()" style="padding: 10px 20px; background-color: #f0f0f0; color: var(--text-color); border: 1px solid #ddd; border-radius: 5px; text-decoration: none;">Cancel</a>
+            <button type="submit" style="padding: 10px 20px; background-color: #ff4444; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600;">Confirm Delete</button>
+        </div>
+    </form>
+</div>
+{% endblock content %}

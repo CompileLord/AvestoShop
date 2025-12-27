@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AvestoShop{% endblock title %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-top">
+                <a href="{% url 'main' %}" class="logo">
+                    <i class="fas fa-bars"></i> AvestoShop
+                </a>
+                
+                <form action="{% url 'search_results' %}" method="GET" class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" name="q" placeholder="Search essentials, groceries and more...">
+                    <button type="submit" style="background:none; border:none; cursor:pointer;">
+                        <i class="fas fa-search" style="color: var(--text-light);"></i>
+                    </button>
+                </form>
+
+                <div class="user-actions">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'profile' %}">
+                            <i class="far fa-user"></i> {{ user.username }}
+                        </a>
+                        <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" style="background:none; border:none; color:inherit; font:inherit; cursor:pointer; display: flex; align-items: center; gap: 8px;">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </button>
+                        </form>
+                    {% else %}
+                        <a href="{% url 'login' %}">
+                            <i class="far fa-user"></i> Sign Up/Sign In
+                        </a>
+                    {% endif %}
+                    
+                    <a href="{% url 'profile' %}">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                    <a href="{% url 'cart' %}">
+                        <i class="fas fa-shopping-cart"></i> Cart
+                    </a>
+                </div>
+            </div>
+
+            <nav class="nav-bar">
+                <ul class="nav-list">
+                    {% for category in header_categories %}
+                        <li class="nav-item">{{ category.title }} <i class="fas fa-chevron-down"></i></li>
+                    {% empty %}
+                        <li class="nav-item">No Categories</li>
+                    {% endfor %}
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        {% block content %}
+        {% endblock content %}
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 AvestoShop. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="form-container" style="max-width: 800px; margin: 40px auto; padding: 30px; background: #fff; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+    <h2 style="text-align: center; margin-bottom: 30px; color: var(--primary-color);">
+        {% if form.instance.pk %}Edit Product{% else %}Add New Product{% endif %}
+    </h2>
+    
+    <form method="post" enctype="multipart/form-data" id="postForm">
+        {% csrf_token %}
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            {% for field in form %}
+                {% if field.name != 'multiple_images' %}
+                <div class="form-group" style="margin-bottom: 20px; {% if field.name == 'description' %}grid-column: span 2;{% endif %}">
+                    <label for="{{ field.id_for_label }}" style="display: block; margin-bottom: 8px; font-weight: 500;">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <small style="color: #666;">{{ field.help_text }}</small>
+                    {% endif %}
+                    {% for error in field.errors %}
+                        <div style="color: red; font-size: 12px; margin-top: 5px;">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <!-- Dynamic Additional Images Section -->
+        <div class="additional-images-section" style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
+            <h3 style="margin-bottom: 20px; color: var(--text-color);">Additional Images</h3>
+            
+            <!-- Existing Images (for UpdateView) -->
+            {% if existing_images %}
+            <div class="existing-images-grid" style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 20px;">
+                {% for img in existing_images %}
+                <div class="existing-image-item" style="position: relative; width: 100px; height: 100px; border: 1px solid #ddd; border-radius: 5px; overflow: hidden;">
+                    <img src="{{ img.image.url }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    <!-- Note: Real removal would need a separate view/AJAX, but for now we just show them -->
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div id="imageUploadContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                <!-- Dynamic inputs will be added here -->
+            </div>
+
+            <button type="button" id="addImageBtn" style="padding: 10px 20px; background: #f0f0f0; border: 1px dashed #ccc; border-radius: 5px; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-plus"></i> Add Image
+            </button>
+        </div>
+        
+        <button type="submit" style="width: 100%; padding: 12px; background-color: var(--primary-color); color: white; border: none; border-radius: 5px; font-size: 16px; font-weight: 600; cursor: pointer; transition: background 0.3s; margin-top: 30px;">
+            {% if form.instance.pk %}Update Product{% else %}Add Product{% endif %}
+        </button>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('imageUploadContainer');
+    const addBtn = document.getElementById('addImageBtn');
+    let imageCount = 0;
+
+    addBtn.addEventListener('click', function() {
+        imageCount++;
+        const item = document.createElement('div');
+        item.className = 'image-upload-item';
+        item.style.cssText = 'position: relative; border: 1px solid #ddd; border-radius: 8px; padding: 10px; background: #f9f9f9; display: flex; flex-direction: column; align-items: center; gap: 10px;';
+        
+        item.innerHTML = `
+            <div class="preview-container" style="width: 100%; height: 100px; border: 1px solid #eee; border-radius: 5px; background: #fff; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                <span style="color: #999; font-size: 12px;">No Preview</span>
+            </div>
+            <input type="file" name="multiple_images" class="dynamic-image-input" style="font-size: 12px; width: 100%;" accept="image/*">
+            <button type="button" class="remove-image-btn" style="position: absolute; top: -10px; right: -10px; width: 24px; height: 24px; border-radius: 50%; background: #ff4444; color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+
+        container.appendChild(item);
+
+        const input = item.querySelector('.dynamic-image-input');
+        const preview = item.querySelector('.preview-container');
+        const removeBtn = item.querySelector('.remove-image-btn');
+
+        input.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.innerHTML = `<img src="${e.target.result}" style="width: 100%; height: 100%; object-fit: cover;">`;
+                }
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+
+        removeBtn.addEventListener('click', function() {
+            item.remove();
+        });
+    });
+});
+</script>
+
+<style>
+    input[type="text"], input[type="number"], input[type="file"], textarea, select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-family: inherit;
+    }
+    input:focus, textarea:focus, select:focus {
+        border-color: var(--primary-color);
+        outline: none;
+    }
+    .image-upload-item:hover {
+        border-color: var(--primary-color) !important;
+    }
+</style>
+{% endblock content %}
