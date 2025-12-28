@@ -7,7 +7,7 @@ from django.db.models import Max, Min, Q, Sum, Avg, Count, F
 from django.views import View
 from django.shortcuts import redirect
 from django.contrib import messages
-from .models import Shop, Category, Post, Cart, Like, Comment, PostImage, Sale
+from .models import Shop, Category, Post, Cart, Like, Comment, PostImage, Sale, City
 from .forms import ShopForm, PostForm, CityForm, CommentForm, LikeForm, CartForm
 
 # Create your views here.
@@ -30,11 +30,15 @@ class MainListView(ListView):
         status = self.request.GET.get('status')
         sort = self.request.GET.get('sort')
         category = self.request.GET.get('category')
+        city = self.request.GET.get('city')
         min_price = self.request.GET.get('min_price')
         max_price = self.request.GET.get('max_price')
         
         if category:
             queryset = queryset.filter(category_id=category)
+        
+        if city:
+            queryset = queryset.filter(shop__city_id=city)
         
         if status:
             queryset = queryset.filter(state_product=status)
@@ -53,6 +57,7 @@ class MainListView(ListView):
             queryset = queryset.order_by('-date_posted')
         
         context['posts'] = queryset
+        context['cities'] = City.objects.all()
         return context
 
 class SearchResultsView(ListView):
@@ -78,7 +83,7 @@ class SearchResultsView(ListView):
             queryset = queryset.filter(category_id=category)
         
         if city:
-            queryset = queryset.filter(shop__city__icontains=city)
+            queryset = queryset.filter(shop__city_id=city)
         
         if status:
             queryset = queryset.filter(state_product=status)
@@ -106,6 +111,7 @@ class SearchResultsView(ListView):
                 context['selected_category'] = None
         context['search_query'] = self.request.GET.get('q', '')
         context['categories'] = Category.objects.all()
+        context['cities'] = City.objects.all()
         return context
 
 class ShopDetailView(DetailView):
@@ -223,10 +229,8 @@ class LikeCreateView(LoginRequiredMixin, View):
         
         if like_qs.exists():
             like_qs.delete()
-            messages.info(request, "You unliked this product.")
         else:
             Like.objects.create(from_user=request.user, post=post_obj)
-            messages.success(request, "You liked this product!")
             
         return redirect('post_detail', pk=post_obj.pk)
 
