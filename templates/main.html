@@ -362,6 +362,7 @@
         <div class="filter-group">
             <label>City</label>
             <select name="city" id="city" onchange="this.form.submit()">
+                <option value="">All Cities</option>
                 {% for city in cities  %}
                   <option value="{{city.pk}}" {% if request.GET.city == city.pk|stringformat:"i" %}selected{% endif %}>{{city.title}}</option>
                 {% endfor %}

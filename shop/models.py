@@ -27,8 +27,8 @@ class Shop(models.Model):
 
 class Post(models.Model):
     class StateProduct(models.TextChoices):
-        USED = 'US', 'Used'
-        NEW = 'NW', 'NEW'
+        USED = ('US', 'Used')
+        NEW = ('NW', 'NEW')
     
     shop = models.ForeignKey(Shop, on_delete=models.CASCADE)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='posts')
