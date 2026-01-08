@@ -1,4 +1,5 @@
 
+
 # Avest-Shop
 
 Avest-Shop is a Django-based e-commerce platform that allows users to create their own shops, list products, and sell them. It provides a complete marketplace with features like product search, filtering, a shopping cart, and a user-friendly dashboard for shop owners.
@@ -19,7 +20,6 @@ Avest-Shop is a Django-based e-commerce platform that allows users to create the
 
 -   **Backend:**
     -   [Django](https://www.djangoproject.com/): A high-level Python web framework.
-    -   [Django REST framework](https://www.django-rest-framework.org/): A powerful and flexible toolkit for building Web APIs.
 -   **Database:**
     -   [SQLite](https://www.sqlite.org/index.html): A C-language library that implements a small, fast, self-contained, high-reliability, full-featured, SQL database engine.
 -   **Frontend:**
@@ -84,3 +84,4 @@ Avest-Shop is a Django-based e-commerce platform that allows users to create the
 ## Contributing
 
 Contributions are welcome! If you have any suggestions, bug reports, or feature requests, please open an issue or submit a pull request.
+=======
